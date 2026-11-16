@@ -1,0 +1,41 @@
+// Prisma schema — Operación PAES: Desactiva la Bomba
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Banco de preguntas estilo PAES (M1/M2 por eje temático)
+model Question {
+  id           Int      @id @default(autoincrement())
+  module       String   // "M1" | "M2"
+  eje          String   // "numeros" | "algebra" | "geometria" | "probabilidad" | "funciones"
+  enunciado    String   // Enunciado de la pregunta
+  alternativas String   // JSON string: array de 5 alternativas
+  respuesta    Int      // Índice de la alternativa correcta (0-4)
+  explicacion  String   // Explicación didáctica del feedback
+  createdAt    DateTime @default(now())
+
+  @@index([module, eje])
+}
+
+// Resultados de partidas para estadísticas y récords
+model GameResult {
+  id         Int      @id @default(autoincrement())
+  playerName String   @default("Anónimo") // nombre del agente para el ranking global
+  module     String   // "M1" | "M2" (dificultad: M1 común / M2 científico)
+  eje        String   // eje temático de la bomba
+  won        Boolean  // true = bomba desactivada
+  strikes    Int      // errores cometidos (0-3)
+  timeLeft   Int      // segundos restantes al terminar
+  timeUsed   Int      // segundos utilizados
+  score      Int      // puntaje final
+  createdAt  DateTime @default(now())
+
+  @@index([module, eje, won])
+  @@index([module, score])
+}
